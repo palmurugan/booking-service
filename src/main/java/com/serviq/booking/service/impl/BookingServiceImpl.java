@@ -10,9 +10,11 @@ import com.serviq.booking.entity.CheckoutSession;
 import com.serviq.booking.exception.BookingException;
 import com.serviq.booking.exception.CheckoutExpiredException;
 import com.serviq.booking.exception.ResourceNotFoundException;
+import com.serviq.booking.factory.payment.PaymentStrategyFactory;
 import com.serviq.booking.repository.BookingRepository;
 import com.serviq.booking.repository.CheckoutSessionRepository;
 import com.serviq.booking.service.BookingService;
+import com.serviq.booking.strategy.payment.PaymentStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,8 +32,8 @@ import java.util.UUID;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
-
     private final CheckoutSessionRepository checkoutSessionRepository;
+    private final PaymentStrategyFactory paymentStrategyFactory;
 
 
     @Override
@@ -56,6 +58,9 @@ public class BookingServiceImpl implements BookingService {
 
         // TODO call provider service to get the slot details.
 
+        // Getting the correct payment strategy
+        PaymentStrategy paymentStrategy = paymentStrategyFactory.getPaymentStrategy(request.getPaymentMethod());
+
         // Create booking
         Booking booking = Booking.builder()
                 .orgId(session.getOrgId())
@@ -66,7 +71,7 @@ public class BookingServiceImpl implements BookingService {
                 .bookingDate(null)
                 .startTime(null)
                 .endTime(null)
-                .status(Booking.BookingStatus.PAYMENT_INITIATED)
+                .status(paymentStrategy.getBookingStatus())
                 .totalAmount(session.getTotalAmount())
                 .isActive(true)
                 .build();
@@ -75,12 +80,35 @@ public class BookingServiceImpl implements BookingService {
         log.info("Booking created with ID: {}", booking.getId());
 
         // TODO payment integration may come here - revisit the architecture
+        // Process payment using strategy
+        PaymentInitiationResponse paymentResponse = paymentStrategy.processPayment(
+                booking.getId(),
+                session.getTotalAmount()
+        );
+
+        booking.setPaymentId(paymentResponse.getPaymentId());
+        bookingRepository.save(booking);
+
+        // Handle immediate confirmation for cash payments
+        if (paymentStrategy.requiresImmediateConfirmation()) {
+            confirmBookingImmediately(booking);
+        }
 
         // Deactivate checkout session
         session.setIsActive(false);
         checkoutSessionRepository.save(session);
+        return paymentResponse;
+    }
 
-        return null;
+    /**
+     * Confirms booking immediately (used for cash on service)
+     */
+    private void confirmBookingImmediately(Booking booking) {
+        log.info("Confirming booking immediately: {}", booking.getId());
+
+        // Confirm the slot
+
+        // Send confirmation notification
     }
 
     @Override

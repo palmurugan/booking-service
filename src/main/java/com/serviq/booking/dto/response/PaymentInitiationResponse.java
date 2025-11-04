@@ -28,6 +28,7 @@ public class PaymentInitiationResponse {
         private String amount;
         private String currency;
         private String merchantId;
+        private String paymentMethod;
         private String callbackUrl;
     }
 }
