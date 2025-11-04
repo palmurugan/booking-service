@@ -1,6 +1,5 @@
 package com.serviq.booking.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serviq.booking.dto.request.CheckoutInitiateRequest;
 import com.serviq.booking.dto.response.CheckoutSessionResponse;
@@ -16,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -38,16 +36,6 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         //TODO Calculate pricing
 
-        // Serialize addons to JSON
-        String addonsJson = null;
-        if (request.getAddonIds() != null && !request.getAddonIds().isEmpty()) {
-            try {
-                addonsJson = objectMapper.writeValueAsString(request.getAddonIds());
-            } catch (JsonProcessingException e) {
-                log.error("Error serializing addons", e);
-            }
-        }
-
         // Create checkout session
         CheckoutSession session = CheckoutSession.builder()
                 .orgId(request.getOrgId())
@@ -55,7 +43,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                 .serviceId(request.getServiceId())
                 .providerId(request.getProviderId())
                 .slotId(request.getSlotId())
-                .selectedAddons(addonsJson)
+                .selectedAddons(null)
                 .subtotal(BigDecimal.ZERO)
                 .discount(BigDecimal.ZERO)
                 .totalAmount(BigDecimal.ZERO)
@@ -66,7 +54,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         session = checkoutSessionRepository.save(session);
         log.info("Checkout session created: {}", session.getId());
 
-        return mapToResponse(session, null);
+        return mapToResponse(session);
     }
 
     @Override
@@ -83,7 +71,7 @@ public class CheckoutServiceImpl implements CheckoutService {
             throw CheckoutExpiredException.session();
         }
 
-        return mapToResponse(session, null);
+        return mapToResponse(session);
     }
 
     @Override
@@ -98,8 +86,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                 .orElseThrow(() -> new ResourceNotFoundException("Checkout session not found for ID: " + sessionId));
     }
 
-    private CheckoutSessionResponse mapToResponse(CheckoutSession session,
-                                                  List<CheckoutSessionResponse.AddonDetail> addonDetails) {
+    private CheckoutSessionResponse mapToResponse(CheckoutSession session) {
         return CheckoutSessionResponse.builder()
                 .sessionId(session.getId())
                 .orgId(session.getOrgId())
@@ -107,7 +94,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                 .serviceId(session.getServiceId())
                 .providerId(session.getProviderId())
                 .slotId(session.getSlotId())
-                .selectedAddons(addonDetails)
+                .selectedAddons(null)
                 .appliedCoupon(session.getAppliedCoupon())
                 .priceBreakdown(CheckoutSessionResponse.PriceBreakdown.builder()
                         .subtotal(session.getSubtotal())

@@ -1,17 +1,20 @@
 package com.serviq.booking.entity;
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
-@Table(name = "checkout_session")
+@Table(name = "checkout_sessions")
 @Data
 @Builder
 @NoArgsConstructor
@@ -38,8 +41,10 @@ public class CheckoutSession {
     @Column(name = "slot_id", nullable = false)
     private UUID slotId;
 
+    @Type(JsonBinaryType.class)
     @Column(name = "selected_addons", columnDefinition = "jsonb")
-    private String selectedAddons;
+    @Builder.Default
+    private Map<String, Object> selectedAddons = Map.of();
 
     @Column(name = "applied_coupon", length = 50)
     private String appliedCoupon;
