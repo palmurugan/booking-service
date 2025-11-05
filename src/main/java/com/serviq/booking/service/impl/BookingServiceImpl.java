@@ -22,7 +22,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -68,9 +70,11 @@ public class BookingServiceImpl implements BookingService {
                 .serviceId(session.getServiceId())
                 .providerId(session.getProviderId())
                 .slotId(session.getSlotId())
-                .bookingDate(null)
-                .startTime(null)
-                .endTime(null)
+                .bookingDate(LocalDate.now())
+                // TODO update the slot times
+                .startTime(LocalTime.now())
+                .endTime(LocalTime.now().plusHours(1))
+
                 .status(paymentStrategy.getBookingStatus())
                 .totalAmount(session.getTotalAmount())
                 .isActive(true)

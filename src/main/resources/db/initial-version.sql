@@ -39,6 +39,8 @@ CREATE TABLE bookings (
 alter table booking.checkout_sessions add column is_active boolean;
 alter table booking.checkout_sessions drop column tax;
 
+alter table booking.bookings add column is_active boolean;
+
 -------------------------------------------------------------------------------------------------------------
 
 -- Payments
