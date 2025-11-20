@@ -21,18 +21,18 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/booking")
+@RequestMapping("/api/v1/bookings")
 @RequiredArgsConstructor
 public class BookingController {
 
     private final BookingService bookingService;
 
     @PostMapping
-    public ResponseEntity<PaymentInitiationResponse> createBooking(
+    public ResponseEntity<BookingResponse> createBooking(
             @Valid @RequestBody CreateBookingRequest request) {
         log.info("POST /api/v1/bookings - Session: {}, Payment Method: {}",
                 request.getSessionId(), request.getPaymentMethod());
-        PaymentInitiationResponse response = bookingService.createBooking(request);
+        BookingResponse response = bookingService.createBooking(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);

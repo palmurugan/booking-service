@@ -18,7 +18,7 @@ public class ConfirmBookingRequest {
     @NotNull(message = "Booking ID is required")
     private UUID bookingId;
 
-    @NotBlank(message = "Transaction ID is required")
+    //@NotBlank(message = "Transaction ID is required")
     private String transactionId;
 
     private String paymentStatus;

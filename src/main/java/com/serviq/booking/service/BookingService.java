@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface BookingService {
-    PaymentInitiationResponse createBooking(CreateBookingRequest request);
+    BookingResponse createBooking(CreateBookingRequest request);
 
     BookingResponse confirmBooking(ConfirmBookingRequest request);
 
