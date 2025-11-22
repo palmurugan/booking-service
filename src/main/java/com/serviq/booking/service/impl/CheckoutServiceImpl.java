@@ -3,9 +3,11 @@ package com.serviq.booking.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serviq.booking.dto.request.CheckoutInitiateRequest;
 import com.serviq.booking.dto.response.CheckoutSessionResponse;
+import com.serviq.booking.dto.response.external.slot.SlotResponse;
 import com.serviq.booking.entity.CheckoutSession;
 import com.serviq.booking.exception.CheckoutExpiredException;
 import com.serviq.booking.exception.ResourceNotFoundException;
+import com.serviq.booking.helper.CheckoutHelper;
 import com.serviq.booking.repository.CheckoutSessionRepository;
 import com.serviq.booking.service.CheckoutService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class CheckoutServiceImpl implements CheckoutService {
 
     private final CheckoutSessionRepository checkoutSessionRepository;
+    private final CheckoutHelper checkoutHelper;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -32,9 +35,10 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         //TODO Validate slot availability
 
-        // TODO Create temporary slot lock
-
-        //TODO Calculate pricing
+        // Block the slot temporarily (To avoid duplicate bookings)
+        SlotResponse slotResponse = checkoutHelper.blockSlot(request.getSlotId());
+        log.info("Slot {} blocked for booking the current status is {}",
+                request.getSlotId(), slotResponse.getStatus());
 
         // Create checkout session
         CheckoutSession session = CheckoutSession.builder()
@@ -53,7 +57,6 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         session = checkoutSessionRepository.save(session);
         log.info("Checkout session created: {}", session.getId());
-
         return mapToResponse(session);
     }
 

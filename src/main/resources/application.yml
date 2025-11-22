@@ -39,7 +39,11 @@ spring:
         max.in.flight.requests.per.connection: 1
         enable.idempotence: true
         compression.type: snappy
-
+  cloud:
+    openfeign:
+      httpclient:
+        hc5:
+          enabled: true
 kafka:
   topic:
     service-events: dev.provider.service.events
