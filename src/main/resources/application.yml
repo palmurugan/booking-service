@@ -5,7 +5,7 @@ spring:
   application:
     name: booking-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://192.168.1.42:5432/smartmart?currentSchema=booking}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/serviq?currentSchema=booking}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
